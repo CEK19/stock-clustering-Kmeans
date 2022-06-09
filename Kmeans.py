@@ -1,3 +1,4 @@
+import enum
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -6,6 +7,9 @@ np.random.seed(42)
 def EuclideanDistanceCal(xi, xj):
     return np.sqrt(np.sum((xi - xj)**2))
 
+def squaredDeviation(xi, mean):
+    return np.sum((xi - mean)**2)
+
 class KMeans:
     def __init__(self, K=5, max_iters=100, plot_steps=False):
         self.K = K
@@ -13,8 +17,11 @@ class KMeans:
         self.plot_steps = plot_steps
         
         # List of samples for each cluster
-        self.clusters = [[] for _ in range(self.K)]
-        self.centroids = []
+        self.clusters = [[] for _ in range(self.K)] # Contain index of each data point.
+        self.centroids = [] # Contain coordiante of centroid points
+        
+        # inertia
+        self.inertia_ = 0
         
     def _initCenters():
         pass
@@ -51,6 +58,16 @@ class KMeans:
             meanClusterValue = np.mean(self.X[cluster], axis=0)
             centroids[idxCluster] = meanClusterValue
         return centroids
+    
+    def _calcInertia(self):
+        wcss = []
+        for idxCluster, cluster  in enumerate(self.clusters):
+            centroid = self.centroids[idxCluster]
+            subsetData  = self.clusters[idxCluster]
+            for idxData in subsetData:
+                point = self.X[idxData]
+                wcss.append(squaredDeviation(point, centroid))
+        return sum(wcss)    
     
     def _isConverged(self, prevCentroids, currCentroids):
         # Distances between each old and new centroids, fol all centroids
@@ -89,6 +106,9 @@ class KMeans:
             prevCentroids = self.centroids
             self.centroids = self._getCentroids(self.clusters)
             
+            # Update inertia_
+            self.inertia_ = self._calcInertia()
+            
             # If clusters have changed -> repeated, if not -> break
             if self._isConverged(prevCentroids=prevCentroids, currCentroids=self.centroids):
                 break
@@ -102,14 +122,19 @@ if __name__ == "__main__":
     from sklearn.datasets import make_blobs
 
     X, y = make_blobs(
-        centers=6, n_samples=10000, n_features=2, shuffle=True, random_state=40
+        centers=10, n_samples=500, n_features=2, shuffle=True, random_state=40
     )
-    print(X.shape)
 
     clusters = len(np.unique(y))
-    print(clusters)
-
-    k = KMeans(K=clusters, max_iters=150, plot_steps=True)
-    y_pred = k.predict(X)
-
-    k.visualize()
+    wcss = []
+    # figure, axis = plt.subplots(clusters/3 + clusters % 3, 3)
+    for num in range(1, clusters + 10):
+        k = KMeans(K=num, max_iters=150, plot_steps=True)    
+        y_pred = k.predict(X)
+        wcss.append(k.inertia_)
+        # k.visualize()    
+    plt.plot(range(1, clusters + 10), wcss)
+    plt.title('The elbow method')
+    plt.xlabel('Number of clusters')
+    plt.ylabel('WCSS')
+    plt.show()
