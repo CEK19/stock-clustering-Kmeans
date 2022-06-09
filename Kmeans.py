@@ -23,7 +23,7 @@ class KMeans:
         # inertia
         self.inertia_ = 0
         
-    def _initCenters():
+    def _initCenters(self):
         pass
 
     def _closestCentroid(self, sample, centroids):
@@ -93,7 +93,7 @@ class KMeans:
         # STEP 1: Initialize
         random_sample_idxs = np.random.choice(self.n_samples, self.K, replace=False)
         self.centroids = [self.X[idx] for idx in random_sample_idxs]        
-        # self._initCenters()
+        # self._initCenters() # TODO Ở ĐÂY NÈ BẠN, XOÁ 2 DÒNG TRÊN ĐI
         
         # STEP 2: Clustering 
         for _ in range(self.max_iters):
@@ -132,7 +132,7 @@ if __name__ == "__main__":
         k = KMeans(K=num, max_iters=150, plot_steps=True)    
         y_pred = k.predict(X)
         wcss.append(k.inertia_)
-        # k.visualize()    
+        k.visualize()    
     plt.plot(range(1, clusters + 10), wcss)
     plt.title('The elbow method')
     plt.xlabel('Number of clusters')
