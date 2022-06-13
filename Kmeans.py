@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+# import statistics
 
 np.random.seed(42)
 
@@ -17,13 +18,39 @@ class KMeans:
         
         # List of samples for each cluster
         self.clusters = [[] for _ in range(self.K)] # Contain index of each data point.
-        self.centroids = [] # Contain coordiante of centroid points
+        self.centroids = [] # Contain coordinate of centroid points
         
         # inertia
         self.inertia_ = 0
-        
+    
+            
     def _initCenters(self):
-        pass
+        clusters = [[] for _ in range(self.K)]
+        X = self.X
+        
+        # Calculate variances of each dimension 
+        variance_x = np.var(X, axis=0)
+        
+        #loop find max variance
+        if (variance_x[0]) :
+            X.sort(key=lambda column: column[0]) 
+        else :
+            X.sort(key=lambda column: column[1])       
+        
+        # push X into cluster to divide to k subsets
+        for idxCluster in range (self.K):           
+            for idxSample, _ in enumerate(self.X):
+                clusters[idxCluster].append(idxSample)
+
+        # find median 
+        
+        for idxCluster in range (self.K):           
+            clusters[idxCluster].append(idxSample)
+
+        # 
+        
+        
+        return self.centroids
 
     def _closestCentroid(self, sample, centroids):
         #  Calculate distance of the current sample to each centroid
