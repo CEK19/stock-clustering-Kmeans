@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from sympy import Idx, centroid
 
 np.random.seed(42)
 
@@ -23,7 +24,27 @@ class KMeans:
         self.inertia_ = 0
         
     def _initCenters(self):
-        pass
+        clusters = [[] for _ in range(self.K)]
+        X = self.X
+        variance = np.var(X, axis = 0)
+        inc_sorted_index = sorted(range(len(variance)), key=lambda k: variance[k])
+        
+        max_column = inc_sorted_index[-1]
+        X = X[np.argsort(X[:, max_column])]
+        runIndex = 0
+        div = len(X)// self.K
+        mod = len(X) % self.K
+        print(X)
+        while (runIndex < len(X)):
+            if (runIndex + div + mod >= len(X) - 1):
+                self.centroids.append(np.median(X[runIndex:runIndex+div+mod, ], axis=0).tolist())                
+                break
+            self.centroids.append(np.median(X[runIndex:runIndex+div, ], axis=0).tolist())
+            runIndex = runIndex + div
+    def _initCenterRandom(self):
+        random_sample_idxs = np.random.choice(self.n_samples, self.K, replace=False)
+        self.centroids = [self.X[idx] for idx in random_sample_idxs]        
+        
 
     def _closestCentroid(self, sample, centroids):
         #  Calculate distance of the current sample to each centroid
@@ -90,9 +111,7 @@ class KMeans:
         self.n_samples, self.n_features = X.shape
         
         # STEP 1: Initialize
-        random_sample_idxs = np.random.choice(self.n_samples, self.K, replace=False)
-        self.centroids = [self.X[idx] for idx in random_sample_idxs]        
-        # self._initCenters() # TODO Ở ĐÂY NÈ BẠN, XOÁ 2 DÒNG TRÊN ĐI
+        self._initCenters()
         
         # STEP 2: Clustering 
         for _ in range(self.max_iters):
@@ -115,3 +134,22 @@ class KMeans:
             #     self.visualize()
         # Classify samples as the index of their clusters
         return self._getClusterLabels(self.clusters)
+    
+from sklearn.datasets import make_blobs
+X, y = make_blobs(
+    centers=3, n_samples=100, n_features=2, shuffle=True, random_state=40
+)
+print("FROM BOTTOM", X)
+clusters = len(np.unique(y))
+wcss = []
+# figure, axis = plt.subplots(clusters/3 + clusters % 3, 3)
+for num in range(2, clusters + 5):
+    k = KMeans(K=num, max_iters=150, plot_steps=True)    
+    y_pred = k.predict(X)
+    wcss.append(k.inertia_)
+    k.visualize()
+plt.plot(range(1, clusters + 10), wcss)
+plt.title('The elbow method')
+plt.xlabel('Number of clusters')
+plt.ylabel('WCSS')
+plt.show()
