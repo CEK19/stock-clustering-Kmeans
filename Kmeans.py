@@ -1,6 +1,5 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from sympy import Idx, centroid
 
 np.random.seed(42)
 
@@ -18,11 +17,12 @@ class KMeans:
         
         # List of samples for each cluster
         self.clusters = [[] for _ in range(self.K)] # Contain index of each data point.
-        self.centroids = [] # Contain coordiante of centroid points
+        self.centroids = [] # Contain coordinate of centroid points
         
         # inertia
         self.inertia_ = 0
-        
+    
+            
     def _initCenters(self):
         clusters = [[] for _ in range(self.K)]
         X = self.X
